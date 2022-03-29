@@ -11,10 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Skllat</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButtonLocalTest">
+   <widget class="QPushButton" name="pushButtonLocalCamera">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -24,10 +24,13 @@
      </rect>
     </property>
     <property name="text">
-     <string>Тест камеры</string>
+     <string>Включить камеру</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButtonConnect">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>230</x>

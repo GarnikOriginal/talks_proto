@@ -1,11 +1,5 @@
 import sys
-import json
-import logging
-
-
-import aiohttp
 import asyncio
-
 from PyQt5.QtCore import QEventLoop
 from PyQt5.QtWidgets import QApplication
 from asyncqt import QEventLoop
