@@ -14,19 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBoxConference">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>50</y>
-      <width>1001</width>
-      <height>541</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Участники конференции</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButtonLocalTest">
     <property name="geometry">
      <rect>
@@ -52,6 +39,17 @@
     <property name="text">
      <string>Подключиться</string>
     </property>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>1001</width>
+      <height>531</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayoutConference"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
