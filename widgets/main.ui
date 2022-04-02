@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
+    <width>1920</width>
     <height>640</height>
    </rect>
   </property>
@@ -48,11 +48,34 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>1001</width>
+      <width>1911</width>
       <height>531</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayoutConference"/>
+    <layout class="QGridLayout" name="gridLayoutConference">
+     <property name="horizontalSpacing">
+      <number>2</number>
+     </property>
+     <property name="verticalSpacing">
+      <number>1</number>
+     </property>
+    </layout>
+   </widget>
+   <widget class="QLineEdit" name="lineEditConnectionIP">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>10</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>127.0.0.1</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -60,7 +83,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1920</width>
      <height>26</height>
     </rect>
    </property>
