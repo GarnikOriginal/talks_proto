@@ -1,13 +1,12 @@
 import av
 import json
-from .VideoStream import VideoStream
 
 
 with open('configs/camera.json', "r") as f:
     __config__ = json.load(f)
 
 
-class LocalStream(VideoStream):
+class CameraStream:
     def __init__(self):
         self.name = __config__["name"]
         self.camera = av.open(self.name, options={"video_size": __config__["video_size"],

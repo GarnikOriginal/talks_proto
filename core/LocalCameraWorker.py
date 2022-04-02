@@ -2,13 +2,13 @@ import torch
 from PyQt5.QtGui import QPixmap, QImage
 from core.VideoWorker import TDDFAVideoWorker
 from core.TDDFA import TDDFAWrapper
-from core.LocalStream import LocalStream
+from core.CameraStream import CameraStream
 
 
 class LocalCameraWorker(TDDFAVideoWorker):
     def __init__(self):
         super(LocalCameraWorker, self).__init__()
-        self.stream = LocalStream()
+        self.stream = CameraStream()
         self.tddfa = TDDFAWrapper((self.stream.coded_width // 4, self.stream.coded_height // 4))
 
     def run(self):
@@ -21,7 +21,6 @@ class LocalCameraWorker(TDDFAVideoWorker):
                     image = QImage(frame, frame.shape[1], frame.shape[0], frame.shape[1] * 3, QImage.Format_RGB888)
                     pixmap = QPixmap.fromImage(image)
                     self.frameReady.emit(pixmap)
-                    print("EMIT FRAME READY")
                 self.packetReady.emit(self.tddfa.pop_packet())
 
     def __del__(self):

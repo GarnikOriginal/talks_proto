@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1920</width>
+    <width>1959</width>
     <height>640</height>
    </rect>
   </property>
@@ -33,7 +33,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>440</x>
       <y>10</y>
       <width>211</width>
       <height>31</height>
@@ -48,7 +48,7 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>1911</width>
+      <width>1941</width>
       <height>531</height>
      </rect>
     </property>
@@ -67,7 +67,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>660</x>
       <y>10</y>
       <width>181</width>
       <height>31</height>
@@ -77,13 +77,29 @@
      <string>127.0.0.1</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButtonOpenConection">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>10</y>
+      <width>201</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Открыть соединение</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1920</width>
+     <width>1959</width>
      <height>26</height>
     </rect>
    </property>
