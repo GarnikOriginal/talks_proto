@@ -5,6 +5,7 @@ fi
 python -m venv env
 source env/bin/activate
 pip install --upgrade pip
+pip install Cython
 pip install opencv-python-headless
 pip install PyQt5
 pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
