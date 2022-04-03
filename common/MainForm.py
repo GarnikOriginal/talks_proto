@@ -33,7 +33,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         thread.start()
         self.threads.append(thread)
         self.local_video = VideoContainer(worker)
-        self.local_video.setMaximumWidth(self.gridLayoutConference.widget().width() / 2)
+        self.local_video.setMaximumWidth(980)
         self.gridLayoutConference.addWidget(self.local_video, 1, 1, 1, 1)
         self.local_video.show()
         self.pushButtonLocalCamera.setEnabled(False)
