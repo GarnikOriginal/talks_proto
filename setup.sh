@@ -14,3 +14,5 @@ pip install scipy
 pip install matplotlib
 pip install PyYAML
 pip install av
+chmod 777 "modules/TDDFA_V2/build.sh"
+./modules/TDDFA_V2/build.sh
