@@ -16,5 +16,5 @@ pip install PyYAML
 pip install av
 cd "modules/TDDFA_V2"
 chmod 777 "build.sh"
-./modules/TDDFA_V2/build.sh
+./build.sh
 cd ../..
