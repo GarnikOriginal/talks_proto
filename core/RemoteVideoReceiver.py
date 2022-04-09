@@ -19,9 +19,6 @@ class RemoteVideoReceiver(VideoWorker):
         self.socket.bind(("", server_port))
         self.socket.listen(1)
         connection, r_address = self.socket.accept()
-        while self.address != r_address:
-            connection.close()
-            connection, r_address = self.socket.accept()
         while connection:
             packet = self.read_packet(connection)
             frames = packet.decode()
