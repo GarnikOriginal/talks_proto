@@ -1,5 +1,3 @@
-import zlib
-import pickle
 import socket
 import PyQt5.QtCore as QtCore
 from core.VideoWorker import VideoWorker
@@ -37,14 +35,13 @@ class RemoteVideoWorker(VideoWorker):
         self.connectionEstablishedSignal.emit(self, self.address)
         while self.connection:
             packet = self.read_packet()
-            packet = zlib.decompress(packet)
-            packet = pickle.loads(packet)
             frames = packet.decode()
             for frame in frames:
                 self.packetReceivedSignal.emit(frame)
 
     @QtCore.pyqtSlot(str)
     def connect(self, address):
+        print(f"Try connect to: {address}")
         try:
             self.socket.connect((address, self.port))
         except Exception as error:
