@@ -8,7 +8,7 @@ class VideoContainer(QLabel):
     def __init__(self, worker: VideoWorker):
         super(VideoContainer, self).__init__()
         self.worker = worker
-        self.worker.frameReadySignal.connectSignal(self.update_frame)
+        self.worker.frameReadySignal.connect(self.update_frame)
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setScaledContents(True)
         self.setMinimumSize(1, 1)

@@ -46,7 +46,7 @@ class RemoteVideoWorker(VideoWorker):
     @QtCore.pyqtSlot(str)
     def connect(self, address):
         try:
-            self.socket.connectSignal((address, self.port))
+            self.socket.connect((address, self.port))
         except Exception as error:
             print(f"Cant connect to {address}")
 
