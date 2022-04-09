@@ -44,7 +44,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.pushButtonLocalCamera.setEnabled(False)
         self.enable_connect_controls(True)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.pyqtSlot()
     def disconnect(self):
         self.enable_connect_controls(True)
         self.pushButtonDisconnect.setEnabled(False)
