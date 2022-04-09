@@ -1,3 +1,5 @@
+import zlib
+import pickle
 import socket
 import PyQt5.QtCore as QtCore
 from PyQt5.QtGui import QPixmap
@@ -43,10 +45,12 @@ class RemoteVideoReceiver(VideoWorker):
                         tail_size = self.message_size - len(self.buffer)
                         self.buffer += packet[0:tail_size]
                         packet = packet[tail_size:]
-                frames = self.buffer.decode()
+                self.buffer = zlib.decompress(self.buffer)
+                frames = pickle.loads(self.buffer).decode()
                 for frame in frames:
                     self.frameReadySignal.emit(frame)
                 self.size_buffer = b""
+                self.buffer = b""
                 self.message_size = -1
         self.socket.close()
         self.connectionClosed.emit(self.address)

@@ -1,3 +1,5 @@
+import cv2
+import random
 import socket
 import PyQt5.QtCore as QtCore
 from core.TDDFA import TDDFAPredictionContainer
