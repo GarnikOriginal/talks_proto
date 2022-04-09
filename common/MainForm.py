@@ -52,7 +52,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         thread = QtCore.QThread(parent=self)
         worker.moveToThread(thread)
         thread.started.connect(worker.run)
-        self.local_video.worker.packetReadySignal.connectSignal(worker.send_packet)
+        self.local_video.worker.packetReadySignal.connect(worker.send_packet)
         self.connectSignal.connect(worker.connect)
         thread.start()
         self.threads.append(thread)
