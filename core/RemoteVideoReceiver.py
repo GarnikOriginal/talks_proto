@@ -19,19 +19,22 @@ class RemoteVideoReceiver(VideoWorker):
         self.socket.bind(("", server_port))
         self.socket.listen(1)
         connection, r_address = self.socket.accept()
+        i = 0
         while connection:
             packet = self.read_packet(connection)
             frames = packet.decode()
             for frame in frames:
                 self.frameReadySignal.emit(frame)
+                print(f"Frame, packet: {i}")
+            i += 1
         self.socket.close()
         self.connectionClosed.emit(self.address)
 
     def read_packet(self, connection):
         while True:
-            data, address = connection.recvfrom(4096)
-            if not data:
-                packet = self.buffer
+            data = connection.recv(4096)
+            if data.endswith(rb'\q'):
+                packet = self.buffer + data[0:-2]
                 self.buffer = b""
                 return packet
             else:

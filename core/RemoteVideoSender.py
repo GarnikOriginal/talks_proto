@@ -18,6 +18,7 @@ class RemoteVideoSender(QtCore.QObject):
     def send_packet(self, packet: TDDFAPredictionContainer):
         try:
             self.socket.sendall(packet.encode())
+            self.socket.sendall(r'\q'.encode('utf-8'))
         except:
             pass
 
