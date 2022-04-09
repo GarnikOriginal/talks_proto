@@ -20,8 +20,8 @@ class LocalCameraWorker(TDDFAVideoWorker):
                     self.tddfa.forward(frame)
                     image = QImage(frame, frame.shape[1], frame.shape[0], frame.shape[1] * 3, QImage.Format_RGB888)
                     pixmap = QPixmap.fromImage(image)
-                    self.frameReady.emit(pixmap)
-                self.packetReady.emit(self.tddfa.pop_packet())
+                    self.frameReadySignal.emit(pixmap)
+                self.packetReadySignal.emit(self.tddfa.pop_packet())
 
     def __del__(self):
         del self.stream

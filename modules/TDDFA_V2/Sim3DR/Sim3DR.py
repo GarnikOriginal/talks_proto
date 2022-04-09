@@ -1,6 +1,18 @@
 # coding: utf-8
 
-from . import _init_paths
+import os.path as osp
+import sys
+
+
+def add_path(path):
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+
+this_dir = osp.dirname(__file__)
+lib_path = osp.join(this_dir, '.')
+add_path(lib_path)
+
 import numpy as np
 import Sim3DR_Cython
 

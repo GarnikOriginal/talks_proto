@@ -4,8 +4,8 @@ from core.TDDFA import TDDFAPredictionContainer
 
 
 class VideoWorker(QtCore.QObject):
-    frameReady = QtCore.pyqtSignal(QPixmap)
+    frameReadySignal = QtCore.pyqtSignal(QPixmap)
 
 
 class TDDFAVideoWorker(VideoWorker):
-    packetReady = QtCore.pyqtSignal(TDDFAPredictionContainer)
+    packetReadySignal = QtCore.pyqtSignal(TDDFAPredictionContainer)

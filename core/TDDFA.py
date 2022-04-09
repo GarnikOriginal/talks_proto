@@ -1,15 +1,20 @@
 import cv2
 import yaml
+import zlib
+import pickle
 import numpy as np
 from typing import Tuple, List
 from modules.TDDFA_V2.FaceBoxes.FaceBoxes import FaceBoxes
 from modules.TDDFA_V2.TDDFA import TDDFA
+from modules.TDDFA_V2.Sim3DR import rasterize
 from modules.TDDFA_V2.utils.tddfa_util import _to_ctype
 from modules.TDDFA_V2.utils.uv import bilinear_interpolate
 
 
 __config_path__ = "configs/tddfa_onnx_config.yml"
 __config__ = yaml.load(open(__config_path__), Loader=yaml.SafeLoader)
+with open("./core/tri.pkl", "rb") as f:
+    __tri__ = pickle.load(f)
 
 
 class TDDFAPredictionContainer:
@@ -17,6 +22,27 @@ class TDDFAPredictionContainer:
         self.background = background
         self.vertices = vertices
         self.colors = colors
+
+    def encode(self):
+        packet = pickle.dumps(self)
+        packet = zlib.compress(packet)
+        return packet
+
+    def decode(self):
+        frames = []
+        for i in range(len(self)):
+            frame = rasterize(_to_ctype(self.vertices[i].T),
+                              __tri__,
+                              self.colors[i],
+                              bg=self.background[i],
+                              height=640,
+                              width=480,
+                              channel=3)
+            frames.append(frame)
+        return frames
+
+    def __len__(self):
+        return len(self.background)
 
 
 class TDDFAWrapper:

@@ -8,13 +8,12 @@ class VideoContainer(QLabel):
     def __init__(self, worker: VideoWorker):
         super(VideoContainer, self).__init__()
         self.worker = worker
-        self.worker.frameReady.connect(self.update_frame)
+        self.worker.frameReadySignal.connectSignal(self.update_frame)
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setScaledContents(True)
         self.setMinimumSize(1, 1)
 
     @QtCore.pyqtSlot(QPixmap)
     def update_frame(self, frame: QPixmap):
-        print("Update frame")
         self.setPixmap(frame)
         self.adjustSize()
