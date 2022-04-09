@@ -74,7 +74,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.remote_video_container.show()
         self.enable_connect_controls(False)
         self.pushButtonDisconnect.setEnabled(True)
-        self.pushButtonDisconnect.clicked.connect(self.disconect)
+        self.pushButtonDisconnect.clicked.connect(self.disconnect)
         self.connectSignal.emit()
 
     def enable_connect_controls(self, state):
