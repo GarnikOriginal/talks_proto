@@ -59,6 +59,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.remote_video_container = VideoContainer(receiver_worker)
         receiver_thread.start()
         self.threads.append(receiver_thread)
+        self.remote_receivers.append(receiver_worker)
 
         sender_worker = RemoteVideoSender(ip)
         sender_thread = QtCore.QThread(parent=self)
@@ -68,6 +69,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.pushButtonDisconnect.clicked.connect(sender_worker.close_connection)
         sender_thread.start()
         self.threads.append(sender_thread)
+        self.remote_senders.append(sender_worker)
 
         self.remote_video_container.setMaximumWidth(self.stream_width)
         self.gridLayoutConference.addWidget(self.remote_video_container, 1, 2, 1, 1)

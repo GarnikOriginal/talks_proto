@@ -12,6 +12,7 @@ class RemoteVideoSender(QtCore.QObject):
 
     def run(self):
         self.socket.connect((self.address, server_port))
+        a = 243 * 532
 
     @QtCore.pyqtSlot(TDDFAPredictionContainer)
     def send_packet(self, packet: TDDFAPredictionContainer):
