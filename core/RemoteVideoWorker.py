@@ -9,17 +9,21 @@ class RemoteVideoWorker(VideoWorker):
     connectionClosedSignal = QtCore.pyqtSignal(str)
     packetReceivedSignal = QtCore.pyqtSignal(TDDFAPredictionContainer)
 
-    def __init__(self):
+    def __init__(self, address):
         super(RemoteVideoWorker, self).__init__()
-        self.port = 45005
+        self.connectionEstablishedSignal.connect(self.receive)
+        self.server_port = 45005
+        self.client_port = 45015
+        self.server_socket = None
+        self.client_socket = None
+        self.server_connection = None
+        self.client_connection = None
+        self.client_address = address
         self.packet_buffer = b""
-        self.socket = None
-        self.connection = None
-        self.address = None
 
-    def read_packet(self):
+    def read_packet(self, connection):
         while True:
-            data, address = self.connection.recvfrom(4096)
+            data, address = connection.recvfrom(4096)
             if not data:
                 packet = self.packet_buffer
                 self.packet_buffer = b""
@@ -28,35 +32,35 @@ class RemoteVideoWorker(VideoWorker):
                 self.packet_buffer += data
 
     def run(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind(("", self.port))
-        self.socket.listen(1)
-        self.connection, self.address = self.socket.accept()
-        self.connectionEstablishedSignal.emit(self, self.address)
-        while self.connection:
-            packet = self.read_packet()
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind(("", self.server_port))
+
+    @QtCore.pyqtSlot(str)
+    def receive(self, address):
+        self.server_socket.listen(1)
+        connection, r_address = self.server_socket.accept()
+        while address != r_address:
+            connection, r_address = self.server_socket.accept()
+        while connection:
+            packet = self.read_packet(connection)
             frames = packet.decode()
             for frame in frames:
                 self.packetReceivedSignal.emit(frame)
 
-    @QtCore.pyqtSlot(str)
-    def connect(self, address):
-        print(f"Try connect to: {address}")
-        try:
-            self.socket.connect((address, self.port))
-        except Exception as error:
-            print(f"Cant connect to {address}")
-
     @QtCore.pyqtSlot()
-    def close_connection(self):
-        self.connection.close()
-        self.socket.close()
+    def connect(self):
+        self.connectionEstablishedSignal.emit(self.client_address)
+        self.client_socket.connect((self.client_address, self.server_port))
 
     @QtCore.pyqtSlot(TDDFAPredictionContainer)
     def send_packet(self, packet: TDDFAPredictionContainer):
-        if self.connection:
-            self.connection.sendall(packet.encode())
-        else:
-            self.connectionClosedSignal.emit(self.address)
+        try:
+            self.client_socket.sendall(packet.encode())
+        except:
+            pass
 
-
+    @QtCore.pyqtSlot()
+    def close_connection(self):
+        self.client_socket.close()
+        self.server_socket.close()

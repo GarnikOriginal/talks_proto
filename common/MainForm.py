@@ -9,12 +9,13 @@ from common.VideoContainer import VideoContainer
 
 class MainForm(QMainWindow, Ui_MainWindow):
     sendPacketSignal = QtCore.pyqtSignal(TDDFAPredictionContainer)
-    connectSignal = QtCore.pyqtSignal(str)
+    connectSignal = QtCore.pyqtSignal()
 
     def __init__(self, app, loop):
         super(MainForm, self).__init__()
         self.app = app
         self.loop = loop
+        self.stream_width = 640
         self.setupUi(self)
         self.setup_callbacks()
         self.local_video = None
@@ -34,21 +35,21 @@ class MainForm(QMainWindow, Ui_MainWindow):
         thread.start()
         self.threads.append(thread)
         self.local_video = VideoContainer(worker)
-        self.local_video.setMaximumWidth(980)
+        self.local_video.setMaximumWidth(self.stream_width)
         self.gridLayoutConference.addWidget(self.local_video, 1, 1, 1, 1)
         self.local_video.show()
         self.pushButtonLocalCamera.setEnabled(False)
-        self.pushButtonOpenConection.setEnabled(True)
+        self.enable_connect_controls(True)
 
     @QtCore.pyqtSlot(str)
     def connection_established(self, address: str):
         self.lineEditConnectionIP.setText(address)
-        self.lineEditConnectionIP.setEnabled(False)
-        self.pushButtonConnect.setEnabled(False)
+        self.enable_connect_controls(False)
 
     @QtCore.pyqtSlot()
-    def open_connection(self):
-        worker = RemoteVideoWorker()
+    def connect(self):
+        ip = self.lineEditConnectionIP.text()
+        worker = RemoteVideoWorker(ip)
         thread = QtCore.QThread(parent=self)
         worker.moveToThread(thread)
         thread.started.connect(worker.run)
@@ -57,22 +58,19 @@ class MainForm(QMainWindow, Ui_MainWindow):
         thread.start()
         self.threads.append(thread)
         self.remote_video = VideoContainer(worker)
-        self.remote_video.setMaximumWidth(980)
+        self.remote_video.setMaximumWidth(self.stream_width)
         self.gridLayoutConference.addWidget(self.remote_video, 1, 2, 1, 1)
         self.remote_video.show()
-        self.pushButtonOpenConection.setEnabled(False)
-        self.pushButtonConnect.setEnabled(True)
-        self.lineEditConnectionIP.setEnabled(True)
+        self.enable_connect_controls(False)
+        self.connectSignal.emit()
 
-    @QtCore.pyqtSlot()
-    def connect_signal_wrap(self):
-        ip = self.lineEditConnectionIP.text()
-        self.connectSignal.emit(ip)
+    def enable_connect_controls(self, state):
+        self.pushButtonConnect.setEnabled(state)
+        self.lineEditConnectionIP.setEnabled(state)
 
     def setup_callbacks(self):
         self.pushButtonLocalCamera.clicked.connect(self.set_local_stream)
-        self.pushButtonOpenConection.clicked.connect(self.open_connection)
-        self.pushButtonConnect.clicked.connect(self.connect_signal_wrap)
+        self.pushButtonConnect.clicked.connect(self.connect)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.local_video:
