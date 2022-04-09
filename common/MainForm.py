@@ -70,9 +70,9 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.connectSignal.emit(ip)
 
     def setup_callbacks(self):
-        self.pushButtonLocalCamera.clicked.connectSignal(self.set_local_stream)
-        self.pushButtonOpenConection.clicked.connectSignal(self.open_connection)
-        self.pushButtonConnect.clicked.connectSignal(self.connect_signal_wrap)
+        self.pushButtonLocalCamera.clicked.connect(self.set_local_stream)
+        self.pushButtonOpenConection.clicked.connect(self.open_connection)
+        self.pushButtonConnect.clicked.connect(self.connect_signal_wrap)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.local_video:
