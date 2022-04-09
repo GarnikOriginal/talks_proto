@@ -17,8 +17,10 @@ class RemoteVideoSender(QtCore.QObject):
     @QtCore.pyqtSlot(TDDFAPredictionContainer)
     def send_packet(self, packet: TDDFAPredictionContainer):
         try:
-            self.socket.sendall(packet.encode())
-            self.socket.sendall(r'\q'.encode('utf-8'))
+            packet = packet.encode()
+            size = len(packet).to_bytes(4, byteorder='big')
+            packet = size + packet
+            self.socket.sendall(packet)
         except:
             pass
 

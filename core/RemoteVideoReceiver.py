@@ -13,20 +13,41 @@ class RemoteVideoReceiver(VideoWorker):
         super(RemoteVideoReceiver, self).__init__()
         self.address = address
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.size_buffer = b""
         self.buffer = b""
+        self.message_size = -1
 
     def run(self):
         self.socket.bind(("", server_port))
         self.socket.listen(1)
         connection, r_address = self.socket.accept()
-        i = 0
+        packet = b""
         while connection:
-            packet = self.read_packet(connection)
-            frames = packet.decode()
-            for frame in frames:
-                self.frameReadySignal.emit(frame)
-                print(f"Frame, packet: {i}")
-            i += 1
+            if packet == b"":
+                packet = connection.recv(4096)
+            if len(self.size_buffer) < 4:
+                if len(packet) < 4:
+                    self.size_buffer += packet
+                    continue
+                else:
+                    self.size_buffer += packet[0:4 - (len(self.size_buffer))]
+                    packet = packet[(len(self.size_buffer)):]
+            else:
+                self.message_size = int.from_bytes(self.size_buffer, byteorder='big')
+                self.buffer += packet
+                while len(self.buffer) != self.message_size:
+                    packet = connection.recv(4096)
+                    if len(self.buffer) + len(packet) < self.message_size:
+                        self.buffer += packet
+                    else:
+                        tail_size = self.message_size - len(self.buffer)
+                        self.buffer += packet[0:tail_size]
+                        packet = packet[tail_size:]
+                frames = self.buffer.decode()
+                for frame in frames:
+                    self.frameReadySignal.emit(frame)
+                self.size_buffer = b""
+                self.message_size = -1
         self.socket.close()
         self.connectionClosed.emit(self.address)
 
