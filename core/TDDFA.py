@@ -3,6 +3,7 @@ import yaml
 import zlib
 import pickle
 import numpy as np
+from PyQt5.QtGui import QImage, QPixmap
 from typing import Tuple, List
 from modules.TDDFA_V2.FaceBoxes.FaceBoxes import FaceBoxes
 from modules.TDDFA_V2.TDDFA import TDDFA
@@ -38,6 +39,8 @@ class TDDFAPredictionContainer:
                               height=640,
                               width=480,
                               channel=3)
+            frame = QImage(frame, frame.shape[1], frame.shape[0], frame.shape[1] * 3, QImage.Format_RGB888)
+            frame = QPixmap.fromImage(frame)
             frames.append(frame)
         return frames
 

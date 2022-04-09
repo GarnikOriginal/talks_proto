@@ -15,6 +15,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1300, 640)
+        MainWindow.setWindowTitle("")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButtonLocalCamera = QtWidgets.QPushButton(self.centralwidget)
@@ -25,7 +26,7 @@ class Ui_MainWindow(object):
         self.pushButtonConnect.setGeometry(QtCore.QRect(230, 10, 211, 31))
         self.pushButtonConnect.setObjectName("pushButtonConnect")
         self.gridLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 50, 1941, 531))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 50, 1281, 531))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.gridLayoutConference = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayoutConference.setContentsMargins(0, 0, 0, 0)
@@ -36,6 +37,10 @@ class Ui_MainWindow(object):
         self.lineEditConnectionIP.setEnabled(False)
         self.lineEditConnectionIP.setGeometry(QtCore.QRect(450, 10, 181, 31))
         self.lineEditConnectionIP.setObjectName("lineEditConnectionIP")
+        self.pushButtonDisconnect = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButtonDisconnect.setEnabled(False)
+        self.pushButtonDisconnect.setGeometry(QtCore.QRect(1080, 10, 211, 31))
+        self.pushButtonDisconnect.setObjectName("pushButtonDisconnect")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1300, 26))
@@ -50,7 +55,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Skllat"))
         self.pushButtonLocalCamera.setText(_translate("MainWindow", "Включить камеру"))
         self.pushButtonConnect.setText(_translate("MainWindow", "Подключиться"))
         self.lineEditConnectionIP.setPlaceholderText(_translate("MainWindow", "127.0.0.1"))
+        self.pushButtonDisconnect.setText(_translate("MainWindow", "Отключится"))

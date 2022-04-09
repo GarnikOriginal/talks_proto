@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Skllat</string>
+   <string/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="pushButtonLocalCamera">
@@ -48,7 +48,7 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>1941</width>
+      <width>1281</width>
       <height>531</height>
      </rect>
     </property>
@@ -75,6 +75,22 @@
     </property>
     <property name="placeholderText">
      <string>127.0.0.1</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonDisconnect">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>1080</x>
+      <y>10</y>
+      <width>211</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Отключится</string>
     </property>
    </widget>
   </widget>

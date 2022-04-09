@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QMainWindow
 from widgets.main import Ui_MainWindow
 from core.TDDFA import TDDFAPredictionContainer
 from core.LocalCameraWorker import LocalCameraWorker
-from core.RemoteVideoWorker import RemoteVideoWorker
+from core.RemoteVideoSender import RemoteVideoSender
+from core.RemoteVideoReceiver import RemoteVideoReceiver
 from common.VideoContainer import VideoContainer
 
 
@@ -18,9 +19,11 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.stream_width = 640
         self.setupUi(self)
         self.setup_callbacks()
-        self.local_video = None
-        self.remote_video = None
+        self.local_video_container = None
+        self.remote_video_container = None
         self.threads = []
+        self.remote_senders = []
+        self.remote_receivers = []
         ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])"
         ipRegex = QtCore.QRegExp("^" + ipRange + "\\." + ipRange + "\\." + ipRange + "\\." + ipRange + "$")
         ipValidator = QtGui.QRegExpValidator(ipRegex, self)
@@ -34,34 +37,44 @@ class MainForm(QMainWindow, Ui_MainWindow):
         thread.started.connect(worker.run)
         thread.start()
         self.threads.append(thread)
-        self.local_video = VideoContainer(worker)
-        self.local_video.setMaximumWidth(self.stream_width)
-        self.gridLayoutConference.addWidget(self.local_video, 1, 1, 1, 1)
-        self.local_video.show()
+        self.local_video_container = VideoContainer(worker)
+        self.local_video_container.setMaximumWidth(self.stream_width)
+        self.gridLayoutConference.addWidget(self.local_video_container, 1, 1, 1, 1)
+        self.local_video_container.show()
         self.pushButtonLocalCamera.setEnabled(False)
         self.enable_connect_controls(True)
 
     @QtCore.pyqtSlot(str)
-    def connection_established(self, address: str):
-        self.lineEditConnectionIP.setText(address)
-        self.enable_connect_controls(False)
+    def disconnect(self):
+        self.enable_connect_controls(True)
+        self.pushButtonDisconnect.setEnabled(False)
 
     @QtCore.pyqtSlot()
     def connect(self):
         ip = self.lineEditConnectionIP.text()
-        worker = RemoteVideoWorker(ip)
-        thread = QtCore.QThread(parent=self)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        self.local_video.worker.packetReadySignal.connect(worker.send_packet)
-        self.connectSignal.connect(worker.connect)
-        thread.start()
-        self.threads.append(thread)
-        self.remote_video = VideoContainer(worker)
-        self.remote_video.setMaximumWidth(self.stream_width)
-        self.gridLayoutConference.addWidget(self.remote_video, 1, 2, 1, 1)
-        self.remote_video.show()
+        receiver_worker = RemoteVideoReceiver(ip)
+        receiver_thread = QtCore.QThread(parent=self)
+        receiver_worker.moveToThread(receiver_thread)
+        receiver_thread.started.connect(receiver_worker.run)
+        self.remote_video_container = VideoContainer(receiver_worker)
+        receiver_thread.start()
+        self.threads.append(receiver_thread)
+
+        sender_worker = RemoteVideoSender(ip)
+        sender_thread = QtCore.QThread(parent=self)
+        sender_worker.moveToThread(sender_thread)
+        sender_thread.started.connect(sender_worker.run)
+        self.local_video_container.worker.packetReadySignal.connect(sender_worker.send_packet)
+        self.pushButtonDisconnect.clicked.connect(sender_worker.close_connection)
+        sender_thread.start()
+        self.threads.append(sender_thread)
+
+        self.remote_video_container.setMaximumWidth(self.stream_width)
+        self.gridLayoutConference.addWidget(self.remote_video_container, 1, 2, 1, 1)
+        self.remote_video_container.show()
         self.enable_connect_controls(False)
+        self.pushButtonDisconnect.setEnabled(True)
+        self.pushButtonDisconnect.clicked.connect(self.disconect)
         self.connectSignal.emit()
 
     def enable_connect_controls(self, state):
@@ -73,5 +86,5 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.pushButtonConnect.clicked.connect(self.connect)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
-        if self.local_video:
-            self.local_video.worker.stream.camera.close()
+        if self.local_video_container:
+            self.local_video_container.worker.stream.camera.close()
