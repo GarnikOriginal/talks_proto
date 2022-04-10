@@ -1,7 +1,6 @@
 import av
 import cv2
 import yaml
-import datetime
 import zlib
 import pickle
 import numpy as np
@@ -103,11 +102,9 @@ class TDDFAWrapper:
         return packet
 
     def forward(self, frame):
-        s = datetime.datetime.utcnow()
         boxes = self.faceboxes(frame)
         background = cv2.resize(frame, self.back_shape, interpolation=cv2.INTER_LINEAR)
         if len(boxes) != 0:
-            s = datetime.datetime.utcnow()
             param_lst, roi_box_lst = self.tddfa(frame, [boxes[0]], crop_policy="box")
             vertices = self.tddfa.recon_vers(param_lst, roi_box_lst, DENSE_FLAG=True)[0]
             vertices = _to_ctype(vertices.T)

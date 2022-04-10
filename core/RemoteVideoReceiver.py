@@ -49,7 +49,6 @@ class RemoteVideoReceiver(VideoWorker):
                 packet = self.buffer[self.message_size:]
                 self.buffer = self.buffer[0:self.message_size]
                 if self.config_received:
-                    print("Get frame")
                     self.buffer = zlib.decompress(self.buffer)
                     frames = pickle.loads(self.buffer).decode(self.decoder_context)
                     for frame in frames:

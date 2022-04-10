@@ -65,6 +65,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         sender_thread = QtCore.QThread(parent=self)
         sender_worker.moveToThread(sender_thread)
         sender_thread.started.connect(sender_worker.run)
+        sender_worker.updateTrafficSignal.connect(self.update_traffic_info)
         self.local_video_container.worker.packetReadySignal.connect(sender_worker.send_packet)
         self.pushButtonDisconnect.clicked.connect(sender_worker.close_connection)
         sender_thread.start()
@@ -78,6 +79,11 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.pushButtonDisconnect.setEnabled(True)
         self.pushButtonDisconnect.clicked.connect(self.disconnect)
         self.connectSignal.emit()
+
+    @QtCore.pyqtSlot(int, int)
+    def update_traffic_info(self, current, total):
+        self.labelTotalTrafficValue.setText(str(total))
+        self.labelTrafficValue.setText(str(current))
 
     def enable_connect_controls(self, state):
         self.pushButtonConnect.setEnabled(state)

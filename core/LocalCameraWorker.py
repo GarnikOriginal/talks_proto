@@ -10,7 +10,9 @@ class LocalCameraWorker(TDDFAVideoWorker):
         super(LocalCameraWorker, self).__init__()
         self.stream = CameraStream()
         self.camera_context = self.stream.config
-        self.tddfa = TDDFAWrapper((self.stream.coded_width // 4, self.stream.coded_height // 4))
+        self.scale_factor = self.camera_context["scale_factor"]
+        self.tddfa = TDDFAWrapper((self.stream.coded_width // self.scale_factor,
+                                   self.stream.coded_height // self.scale_factor))
 
     def run(self):
         torch.set_grad_enabled(False)
