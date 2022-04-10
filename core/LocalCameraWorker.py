@@ -9,6 +9,7 @@ class LocalCameraWorker(TDDFAVideoWorker):
     def __init__(self):
         super(LocalCameraWorker, self).__init__()
         self.stream = CameraStream()
+        self.camera_context = self.stream.config
         self.tddfa = TDDFAWrapper((self.stream.coded_width // 4, self.stream.coded_height // 4))
 
     def run(self):

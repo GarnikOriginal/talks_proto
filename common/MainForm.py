@@ -61,7 +61,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.threads.append(receiver_thread)
         self.remote_receivers.append(receiver_worker)
 
-        sender_worker = RemoteVideoSender(ip)
+        sender_worker = RemoteVideoSender(ip, self.local_video_container.worker.camera_context)
         sender_thread = QtCore.QThread(parent=self)
         sender_worker.moveToThread(sender_thread)
         sender_thread.started.connect(sender_worker.run)
@@ -86,6 +86,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
     def setup_callbacks(self):
         self.pushButtonLocalCamera.clicked.connect(self.set_local_stream)
         self.pushButtonConnect.clicked.connect(self.connect)
+        self.pushButtonDisconnect.clicked.connect(self.disconnect)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.local_video_container:

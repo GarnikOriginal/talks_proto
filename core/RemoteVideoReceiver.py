@@ -1,3 +1,5 @@
+import av
+import json
 import zlib
 import pickle
 import socket
@@ -15,6 +17,10 @@ class RemoteVideoReceiver(VideoWorker):
         super(RemoteVideoReceiver, self).__init__()
         self.address = address
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.config = None
+        self.decoder = None
+        self.decoder_context = None
+        self.config_received = False
         self.size_buffer = b""
         self.buffer = b""
         self.message_size = -1
@@ -37,30 +43,36 @@ class RemoteVideoReceiver(VideoWorker):
             else:
                 self.message_size = int.from_bytes(self.size_buffer, byteorder='big')
                 self.buffer += packet
-                while len(self.buffer) != self.message_size:
+                while len(self.buffer) < self.message_size:
                     packet = connection.recv(4096)
-                    if len(self.buffer) + len(packet) < self.message_size:
-                        self.buffer += packet
-                    else:
-                        tail_size = self.message_size - len(self.buffer)
-                        self.buffer += packet[0:tail_size]
-                        packet = packet[tail_size:]
-                self.buffer = zlib.decompress(self.buffer)
-                frames = pickle.loads(self.buffer).decode()
-                for frame in frames:
-                    self.frameReadySignal.emit(frame)
+                    self.buffer += packet
+                packet = self.buffer[self.message_size:]
+                self.buffer = self.buffer[0:self.message_size]
+                if self.config_received:
+                    print("Get frame")
+                    self.buffer = zlib.decompress(self.buffer)
+                    frames = pickle.loads(self.buffer).decode(self.decoder_context)
+                    for frame in frames:
+                        self.frameReadySignal.emit(frame)
+                else:
+                    config = self.buffer.decode("utf8")
+                    self.config = json.loads(config)
+                    print(f"Get config: {self.config}")
+                    self.config_received = True
+                    self.create_decoder()
                 self.size_buffer = b""
                 self.buffer = b""
                 self.message_size = -1
         self.socket.close()
         self.connectionClosed.emit(self.address)
 
-    def read_packet(self, connection):
-        while True:
-            data = connection.recv(4096)
-            if data.endswith(rb'\q'):
-                packet = self.buffer + data[0:-2]
-                self.buffer = b""
-                return packet
-            else:
-                self.buffer += data
+    def create_decoder(self):
+        decoder = av.codec.Codec("mpeg4", "r")
+        context = decoder.create()
+        context.format = av.video.format.VideoFormat("yuv420p")
+        context.framerate = self.config["framerate"]
+        h, w = self.config["video_size"].split("x")
+        context.height = int(h) // 10
+        context.width = int(w) // 10
+        self.decoder = decoder
+        self.decoder_context = context

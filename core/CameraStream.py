@@ -8,6 +8,7 @@ with open('configs/camera.json', "r") as f:
 
 class CameraStream:
     def __init__(self):
+        self.config = __config__
         self.name = __config__["name"]
         self.camera = av.open(self.name, options={"video_size": __config__["video_size"],
                                                   "framerate": __config__["framerate"]})
