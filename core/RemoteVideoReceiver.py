@@ -57,7 +57,6 @@ class RemoteVideoReceiver(VideoWorker):
                 else:
                     config = self.buffer.decode("utf8")
                     self.config = json.loads(config)
-                    print(f"Get config: {self.config}")
                     self.config_received = True
                     self.create_decoder()
                 self.size_buffer = b""
