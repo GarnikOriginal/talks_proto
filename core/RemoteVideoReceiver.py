@@ -5,11 +5,14 @@ import pickle
 import socket
 import PyQt5.QtCore as QtCore
 from PyQt5.QtGui import QPixmap
+from common.Telemetry import Telemetry
 from core.VideoWorker import VideoWorker
 from core.сore import server_port
 
 
 class RemoteVideoReceiver(VideoWorker):
+    updateTrafficSignal = QtCore.pyqtSignal(int, int)
+    updateOutputFPSSignal = QtCore.pyqtSignal(int)
     frameReadySignal = QtCore.pyqtSignal(QPixmap)
     connectionClosed = QtCore.pyqtSignal(str)
 
@@ -21,6 +24,7 @@ class RemoteVideoReceiver(VideoWorker):
         self.decoder = None
         self.decoder_context = None
         self.config_received = False
+        self.telemetry = Telemetry()
         self.size_buffer = b""
         self.buffer = b""
         self.message_size = -1
@@ -46,12 +50,14 @@ class RemoteVideoReceiver(VideoWorker):
                 while len(self.buffer) < self.message_size:
                     packet = connection.recv(4096)
                     self.buffer += packet
+                self.telemetry.step_traffic(len(self.buffer) / 1024)
                 packet = self.buffer[self.message_size:]
                 self.buffer = self.buffer[0:self.message_size]
                 if self.config_received:
                     self.buffer = zlib.decompress(self.buffer)
                     frames = pickle.loads(self.buffer).decode(self.decoder_context)
                     for frame in frames:
+                        self.telemetry.step_frame()
                         self.frameReadySignal.emit(frame)
                 else:
                     config = self.buffer.decode("utf8")
@@ -61,6 +67,10 @@ class RemoteVideoReceiver(VideoWorker):
                 self.size_buffer = b""
                 self.buffer = b""
                 self.message_size = -1
+                if self.telemetry.stats_ready():
+                    traffic, total_traffic, fps = self.telemetry.get_stats()
+                    self.updateTrafficSignal.emit(traffic, total_traffic)
+                    self.updateOutputFPSSignal.emit(fps)
         self.socket.close()
         self.connectionClosed.emit(self.address)
 

@@ -6,11 +6,11 @@ from core.CameraStream import CameraStream
 
 
 class LocalCameraWorker(TDDFAVideoWorker):
-    def __init__(self):
+    def __init__(self, config):
         super(LocalCameraWorker, self).__init__()
-        self.stream = CameraStream()
+        self.stream = CameraStream(config)
         self.camera_context = self.stream.config
-        self.scale_factor = self.camera_context["scale_factor"]
+        self.scale_factor = config["bg_scale"]
         self.tddfa = TDDFAWrapper((self.stream.coded_width // self.scale_factor,
                                    self.stream.coded_height // self.scale_factor))
 

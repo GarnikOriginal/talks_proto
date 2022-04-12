@@ -2,13 +2,14 @@ import av
 import json
 import socket
 import PyQt5.QtCore as QtCore
-from datetime import datetime
+from common.Telemetry import Telemetry
 from core.TDDFA import TDDFAPredictionContainer
 from core.сore import server_port
 
 
 class RemoteVideoSender(QtCore.QObject):
     updateTrafficSignal = QtCore.pyqtSignal(int, int)
+    updateOutputFPSSignal = QtCore.pyqtSignal(int)
 
     def __init__(self, address, local_config):
         super(RemoteVideoSender, self).__init__()
@@ -23,10 +24,7 @@ class RemoteVideoSender(QtCore.QObject):
         h, w = self.local_config["video_size"].split("x")
         self.encoder_contex.height = int(h)
         self.encoder_contex.width = int(w)
-        self.frame_count = 0
-        self.prev_time = datetime.utcnow()
-        self.total_traffic = 0
-        self.current_traffic = 0
+        self.telemetry = Telemetry()
 
     def run(self):
         while self.socket.connect_ex((self.address, server_port)):
@@ -42,14 +40,12 @@ class RemoteVideoSender(QtCore.QObject):
             prefix = size.to_bytes(4, byteorder='big')
             packet = prefix + packet
             self.socket.sendall(packet)
-            self.total_traffic += size / 1024
-            self.current_traffic += size / 1024
-            if self.current_traffic > 1e4:
-                time = datetime.utcnow()
-                timedelta = (time - self.prev_time).total_seconds()
-                self.updateTrafficSignal.emit(self.current_traffic / timedelta, self.total_traffic)
-                self.current_traffic = 0
-                self.prev_time = time
+            self.telemetry.step_traffic(size / 1024)
+            self.telemetry.step_frame()
+            if self.telemetry.stats_ready():
+                traffic, total_traffic, fps = self.telemetry.get_stats()
+                self.updateTrafficSignal.emit(traffic, total_traffic)
+                self.updateOutputFPSSignal.emit(fps)
         except Exception as err:
             print(err)
 

@@ -1,17 +1,12 @@
 import av
-import json
-
-
-with open('configs/camera.json', "r") as f:
-    __config__ = json.load(f)
 
 
 class CameraStream:
-    def __init__(self):
-        self.config = __config__
-        self.name = __config__["name"]
-        self.camera = av.open(self.name, options={"video_size": __config__["video_size"],
-                                                  "framerate": __config__["framerate"]})
+    def __init__(self, config):
+        self.config = config
+        self.name = config["name"]
+        self.camera = av.open(self.name, options={"video_size": config["video_size"],
+                                                  "framerate": str(config["framerate"])})
         self.steam = self.camera.demux()
         self.context = self.camera.streams.video[0].codec_context
         self.coded_height = self.context.coded_height

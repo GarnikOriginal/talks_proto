@@ -31,7 +31,9 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def set_local_stream(self):
-        worker = LocalCameraWorker()
+        camera_config = self.get_camera_config()
+        self.enable_camera_settings(False)
+        worker = LocalCameraWorker(camera_config)
         thread = QtCore.QThread(parent=self)
         worker.moveToThread(thread)
         thread.started.connect(worker.run)
@@ -55,6 +57,8 @@ class MainForm(QMainWindow, Ui_MainWindow):
         receiver_worker = RemoteVideoReceiver(ip)
         receiver_thread = QtCore.QThread(parent=self)
         receiver_worker.moveToThread(receiver_thread)
+        receiver_worker.updateTrafficSignal.connect(self.update_input_traffic_info)
+        receiver_worker.updateOutputFPSSignal.connect(self.update_input_fps_info)
         receiver_thread.started.connect(receiver_worker.run)
         self.remote_video_container = VideoContainer(receiver_worker)
         receiver_thread.start()
@@ -65,7 +69,8 @@ class MainForm(QMainWindow, Ui_MainWindow):
         sender_thread = QtCore.QThread(parent=self)
         sender_worker.moveToThread(sender_thread)
         sender_thread.started.connect(sender_worker.run)
-        sender_worker.updateTrafficSignal.connect(self.update_traffic_info)
+        sender_worker.updateTrafficSignal.connect(self.update_out_traffic_info)
+        sender_worker.updateOutputFPSSignal.connect(self.update_out_fps_info)
         self.local_video_container.worker.packetReadySignal.connect(sender_worker.send_packet)
         self.pushButtonDisconnect.clicked.connect(sender_worker.close_connection)
         sender_thread.start()
@@ -81,9 +86,36 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.connectSignal.emit()
 
     @QtCore.pyqtSlot(int, int)
-    def update_traffic_info(self, current, total):
+    def update_out_traffic_info(self, current, total):
         self.labelTotalTrafficValue.setText(str(total))
         self.labelTrafficValue.setText(str(current))
+
+    @QtCore.pyqtSlot(int)
+    def update_out_fps_info(self, current):
+        self.labelOutFpsValue.setText(str(current))
+
+    @QtCore.pyqtSlot(int, int)
+    def update_input_traffic_info(self, current, total):
+        self.labelTotalInputTrafficValue .setText(str(total))
+        self.labelInputTrafficValue.setText(str(current))
+
+    @QtCore.pyqtSlot(int)
+    def update_input_fps_info(self, current):
+        self.labelInputFpsValue.setText(str(current))
+
+    def get_camera_config(self):
+        config = {
+            "bg_scale": int(self.comboBoxBgScale.currentText()),
+            "video_size": self.comboBoxResulution.currentText(),
+            "framerate": int(self.comboBoxFPS.currentText()),
+            "name": "/dev/video0"
+        }
+        return config
+
+    def enable_camera_settings(self, enable=False):
+        self.comboBoxBgScale.setEnabled(enable)
+        self.comboBoxResulution.setEnabled(enable)
+        self.comboBoxFPS.setEnabled(enable)
 
     def enable_connect_controls(self, state):
         self.pushButtonConnect.setEnabled(state)

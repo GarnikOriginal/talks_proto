@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1555</width>
+    <width>1556</width>
     <height>705</height>
    </rect>
   </property>
@@ -54,7 +54,7 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>1251</width>
+      <width>1291</width>
       <height>531</height>
      </rect>
     </property>
@@ -99,12 +99,12 @@
      <string>Disconnect</string>
     </property>
    </widget>
-   <widget class="QLabel" name="labelFpsTitle">
+   <widget class="QLabel" name="labelOutFpsTitle">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>580</y>
-      <width>51</width>
+      <width>131</width>
       <height>41</height>
      </rect>
     </property>
@@ -114,15 +114,15 @@
      </font>
     </property>
     <property name="text">
-     <string>FPS:</string>
+     <string>Output FPS:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="labelFpsValue">
+   <widget class="QLabel" name="labelOutFpsValue">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>140</x>
       <y>580</y>
-      <width>1491</width>
+      <width>271</width>
       <height>41</height>
      </rect>
     </property>
@@ -138,9 +138,9 @@
    <widget class="QLabel" name="labelTrafficValue">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>180</x>
       <y>620</y>
-      <width>1401</width>
+      <width>231</width>
       <height>41</height>
      </rect>
     </property>
@@ -158,7 +158,7 @@
      <rect>
       <x>10</x>
       <y>620</y>
-      <width>141</width>
+      <width>171</width>
       <height>41</height>
      </rect>
     </property>
@@ -168,7 +168,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Traffic, Kb/S:</string>
+     <string>Out signal, Kb/s:</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelTotalTrafficTitle">
@@ -186,15 +186,15 @@
      </font>
     </property>
     <property name="text">
-     <string>Total traffic, Kb:</string>
+     <string>Total out, Kb:</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelTotalTrafficValue">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>150</x>
       <y>660</y>
-      <width>1371</width>
+      <width>261</width>
       <height>41</height>
      </rect>
     </property>
@@ -210,9 +210,9 @@
    <widget class="QLabel" name="labelBGScale">
     <property name="geometry">
      <rect>
-      <x>1270</x>
-      <y>90</y>
-      <width>201</width>
+      <x>1310</x>
+      <y>130</y>
+      <width>191</width>
       <height>41</height>
      </rect>
     </property>
@@ -222,15 +222,15 @@
      </font>
     </property>
     <property name="text">
-     <string>Background scale - </string>
+     <string>Background scale:</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="comboBoxBgScale">
     <property name="geometry">
      <rect>
-      <x>1470</x>
-      <y>90</y>
-      <width>81</width>
+      <x>1500</x>
+      <y>130</y>
+      <width>51</width>
       <height>41</height>
      </rect>
     </property>
@@ -269,9 +269,9 @@
    <widget class="QLabel" name="labelSettings">
     <property name="geometry">
      <rect>
-      <x>1270</x>
+      <x>1310</x>
       <y>50</y>
-      <width>281</width>
+      <width>241</width>
       <height>41</height>
      </rect>
     </property>
@@ -281,11 +281,212 @@
      </font>
     </property>
     <property name="text">
-     <string>Settings</string>
+     <string>Camera settings</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
+   </widget>
+   <widget class="QLabel" name="labelInputFpsTitle">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>580</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Input FPS:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelInputFpsValue">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>580</y>
+      <width>431</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelInputTrafficValue">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>620</y>
+      <width>261</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelInputTrafficTitle">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>620</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Input signal, Kb/s:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelTotalInputTrafficTitle">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>660</y>
+      <width>171</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Total input, Kb:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelTotalInputTrafficValue">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>660</y>
+      <width>311</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelFpsSelectorTitle">
+    <property name="geometry">
+     <rect>
+      <x>1440</x>
+      <y>170</y>
+      <width>51</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>FPS:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxFPS">
+    <property name="geometry">
+     <rect>
+      <x>1500</x>
+      <y>170</y>
+      <width>51</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="currentText">
+     <string>15</string>
+    </property>
+    <property name="insertPolicy">
+     <enum>QComboBox::NoInsert</enum>
+    </property>
+    <item>
+     <property name="text">
+      <string>15</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>30</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="labelResolutionSelectorTitle">
+    <property name="geometry">
+     <rect>
+      <x>1310</x>
+      <y>90</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Resulution:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxResulution">
+    <property name="geometry">
+     <rect>
+      <x>1430</x>
+      <y>90</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="currentText">
+     <string>1920x1080</string>
+    </property>
+    <property name="insertPolicy">
+     <enum>QComboBox::NoInsert</enum>
+    </property>
+    <item>
+     <property name="text">
+      <string>1920x1080</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1080x1024</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>640x480</string>
+     </property>
+    </item>
    </widget>
   </widget>
  </widget>
