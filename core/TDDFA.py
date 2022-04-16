@@ -16,8 +16,8 @@ from modules.TDDFA_V2.utils.uv import bilinear_interpolate, uv_tex, g_uv_coords,
 
 __yuv420p__ = av.video.format.VideoFormat('yuv420p')
 __bgr24__ = av.video.format.VideoFormat('bgr24')
-__uv_text_h__ = 640
-__uv_text_w__ = 480
+__uv_text_h__ = 256
+__uv_text_w__ = 256
 __config_path__ = "configs/tddfa_onnx_config.yml"
 __config__ = yaml.load(open(__config_path__), Loader=yaml.SafeLoader)
 __uv_cords__ = _to_ctype(process_uv(g_uv_coords.copy(), uv_h=__uv_text_h__, uv_w=__uv_text_w__))
