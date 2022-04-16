@@ -7,7 +7,7 @@ import PyQt5.QtCore as QtCore
 from PyQt5.QtGui import QPixmap
 from common.Telemetry import Telemetry
 from core.VideoWorker import VideoWorker
-from core.TDDFA import __uv_text_size__, __yuv420p__
+from core.TDDFA import __uv_text_h__, __uv_text_w__, __yuv420p__
 from core.сore import server_port
 
 
@@ -83,8 +83,8 @@ class RemoteVideoReceiver(VideoWorker):
         self.bg_decoder, self.bg_decoder_context = self.create_decoder(h // self.config["bg_scale"],
                                                                        w // self.config["bg_scale"],
                                                                        int(self.config["framerate"]))
-        self.uv_decoder, self.uv_decoder_context = self.create_decoder(__uv_text_size__,
-                                                                       __uv_text_size__,
+        self.uv_decoder, self.uv_decoder_context = self.create_decoder(__uv_text_h__,
+                                                                       __uv_text_w__,
                                                                        int(self.config["framerate"]))
 
     @staticmethod

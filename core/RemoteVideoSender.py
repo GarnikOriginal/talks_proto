@@ -3,7 +3,7 @@ import json
 import socket
 import PyQt5.QtCore as QtCore
 from common.Telemetry import Telemetry
-from core.TDDFA import TDDFAPredictionContainer, __yuv420p__, __uv_text_size__
+from core.TDDFA import TDDFAPredictionContainer, __yuv420p__, __uv_text_w__, __uv_text_h__
 from core.сore import server_port
 
 
@@ -21,8 +21,8 @@ class RemoteVideoSender(QtCore.QObject):
         self.bg_encoder, self.bg_encoder_contex = self.create_encoder(int(h) // self.local_config["bg_scale"],
                                                                       int(w) // self.local_config["bg_scale"],
                                                                       self.local_config["framerate"])
-        self.uv_encoder, self.uv_encoder_contex = self.create_encoder(__uv_text_size__,
-                                                                      __uv_text_size__,
+        self.uv_encoder, self.uv_encoder_contex = self.create_encoder(__uv_text_h__,
+                                                                      __uv_text_w__,
                                                                       self.local_config["framerate"])
         self.telemetry = Telemetry()
 

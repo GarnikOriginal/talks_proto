@@ -16,18 +16,25 @@ from modules.TDDFA_V2.utils.uv import bilinear_interpolate, uv_tex, g_uv_coords,
 
 __yuv420p__ = av.video.format.VideoFormat('yuv420p')
 __bgr24__ = av.video.format.VideoFormat('bgr24')
-__uv_text_size__ = 256
+__uv_text_h__ = 640
+__uv_text_w__ = 480
 __config_path__ = "configs/tddfa_onnx_config.yml"
 __config__ = yaml.load(open(__config_path__), Loader=yaml.SafeLoader)
-__uv_cords__ = _to_ctype(process_uv(g_uv_coords.copy(), uv_h=__uv_text_size__, uv_w=__uv_text_size__))
+__uv_cords__ = _to_ctype(process_uv(g_uv_coords.copy(), uv_h=__uv_text_h__, uv_w=__uv_text_w__))
 with open("./core/tri.pkl", "rb") as f:
     __tri__ = pickle.load(f)
+__tddfa__ = TDDFA(gpu_mode=False, **__config__)
 
 
 class TDDFAPredictionContainer:
-    def __init__(self, background: Dict[int, np.ndarray], vertices: Dict[int, np.ndarray], uv_textures: Dict[int, np.ndarray]):
+    def __init__(self,
+                 background: Dict[int, np.ndarray],
+                 deep_features: Dict[int, np.ndarray],
+                 roi_boxes: Dict[int, np.ndarray],
+                 uv_textures: Dict[int, np.ndarray]):
         self.background = background
-        self.vertices = vertices
+        self.deep_features = deep_features
+        self.roi_boxes = roi_boxes
         self.uv_textures = uv_textures
 
     def encode(self, bg_context, uv_context):
@@ -51,7 +58,8 @@ class TDDFAPredictionContainer:
             if key in self.uv_textures.keys():
                 uv_text = self.decode_packet(self.uv_textures[key], uv_context)
                 colors = bilinear_interpolate(uv_text, __uv_cords__[:, 0], __uv_cords__[:, 1]) / 255.
-                ver = _to_ctype(self.vertices[key].T)
+                ver = __tddfa__.recon_vers([self.deep_features[key]], [self.roi_boxes[key]], DENSE_FLAG=True)[0]
+                ver = _to_ctype(ver.T)
                 frame = rasterize(ver, __tri__, colors, bg=bg)
             else:
                 frame = bg
@@ -93,14 +101,16 @@ class TDDFAWrapper:
         self.faceboxes = FaceBoxes()
         self.back_shape = background_shape
         self.background = {}
-        self.vertices = {}
+        self.deep_features = {}
+        self.roi_boxes = {}
         self.uv_textures = {}
         self.frame_num = 0
 
     def pop_packet(self):
-        packet = TDDFAPredictionContainer(self.background, self.vertices, self.uv_textures)
+        packet = TDDFAPredictionContainer(self.background, self.deep_features, self.roi_boxes, self.uv_textures)
         self.background = {}
-        self.vertices = {}
+        self.deep_features = {}
+        self.roi_boxes = {}
         self.uv_textures = {}
         self.frame_num = 0
         return packet
@@ -111,7 +121,8 @@ class TDDFAWrapper:
         if len(boxes) != 0:
             param_lst, roi_box_lst = self.tddfa(frame, [boxes[0]], crop_policy="box")
             vertices = self.tddfa.recon_vers(param_lst, roi_box_lst, DENSE_FLAG=True)[0]
-            uv_texture = uv_tex(frame, [vertices], self.tddfa.tri, uv_h=__uv_text_size__, uv_w=__uv_text_size__)
-            self.vertices[self.frame_num] = vertices
+            uv_texture = uv_tex(frame, [vertices], self.tddfa.tri, uv_h=__uv_text_h__, uv_w=__uv_text_w__)
+            self.deep_features[self.frame_num] = param_lst[0]
+            self.roi_boxes[self.frame_num] = roi_box_lst[0]
             self.uv_textures[self.frame_num] = uv_texture
         self.background[self.frame_num] = background
