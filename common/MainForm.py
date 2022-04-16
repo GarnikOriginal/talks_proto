@@ -111,7 +111,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
             "bg_scale": int(self.comboBoxBgScale.currentText()),
             "video_size": self.comboBoxResulution.currentText(),
             "framerate": int(self.comboBoxFPS.currentText()),
-            "name": "/dev/video1"
+            "name": "/dev/video0"
         }
         return config
 
