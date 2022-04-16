@@ -1,3 +1,6 @@
+import sys
+sys.path.append("./modules/TDDFA_V2")
+
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QMainWindow
 from widgets.main import Ui_MainWindow
@@ -108,7 +111,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
             "bg_scale": int(self.comboBoxBgScale.currentText()),
             "video_size": self.comboBoxResulution.currentText(),
             "framerate": int(self.comboBoxFPS.currentText()),
-            "name": "/dev/video0"
+            "name": "/dev/video1"
         }
         return config
 

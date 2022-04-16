@@ -3,7 +3,7 @@ import json
 import socket
 import PyQt5.QtCore as QtCore
 from common.Telemetry import Telemetry
-from core.TDDFA import TDDFAPredictionContainer
+from core.TDDFA import TDDFAPredictionContainer, __yuv420p__, __uv_text_size__
 from core.сore import server_port
 
 
@@ -17,13 +17,13 @@ class RemoteVideoSender(QtCore.QObject):
         self.local_config = local_config
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.config_sent = False
-        self.encoder = av.codec.Codec("mpeg4", "w")
-        self.encoder_contex = self.encoder.create()
-        self.encoder_contex.format = av.video.format.VideoFormat("yuv420p")
-        self.encoder_contex.framerate = self.local_config["framerate"]
         h, w = self.local_config["video_size"].split("x")
-        self.encoder_contex.height = int(h)
-        self.encoder_contex.width = int(w)
+        self.bg_encoder, self.bg_encoder_contex = self.create_encoder(int(h) // self.local_config["bg_scale"],
+                                                                      int(w) // self.local_config["bg_scale"],
+                                                                      self.local_config["framerate"])
+        self.uv_encoder, self.uv_encoder_contex = self.create_encoder(__uv_text_size__,
+                                                                      __uv_text_size__,
+                                                                      self.local_config["framerate"])
         self.telemetry = Telemetry()
 
     def run(self):
@@ -35,7 +35,7 @@ class RemoteVideoSender(QtCore.QObject):
         try:
             if not self.config_sent:
                 self.send_conf()
-            packet = packet.encode(self.encoder_contex)
+            packet = packet.encode(self.bg_encoder_contex, self.uv_encoder_contex)
             size = len(packet)
             prefix = size.to_bytes(4, byteorder='big')
             packet = prefix + packet
@@ -47,7 +47,7 @@ class RemoteVideoSender(QtCore.QObject):
                 self.updateTrafficSignal.emit(traffic, total_traffic)
                 self.updateOutputFPSSignal.emit(fps)
         except Exception as err:
-            print(err)
+            raise err
 
     def send_conf(self):
         conf = json.dumps(self.local_config)
@@ -56,6 +56,16 @@ class RemoteVideoSender(QtCore.QObject):
         conf = size + conf
         self.socket.sendall(conf)
         self.config_sent = True
+
+    @staticmethod
+    def create_encoder(h, w, framerate):
+        encoder = av.codec.Codec("mpeg4", "w")
+        context = encoder.create()
+        context.format = __yuv420p__
+        context.framerate = framerate
+        context.height = h
+        context.width = w
+        return encoder, context
 
     @QtCore.pyqtSlot()
     def close_connection(self):

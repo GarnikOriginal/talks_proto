@@ -11,54 +11,59 @@ from modules.TDDFA_V2.FaceBoxes.FaceBoxes import FaceBoxes
 from modules.TDDFA_V2.TDDFA import TDDFA
 from modules.TDDFA_V2.Sim3DR import rasterize
 from modules.TDDFA_V2.utils.tddfa_util import _to_ctype
-from modules.TDDFA_V2.utils.uv import bilinear_interpolate
+from modules.TDDFA_V2.utils.uv import bilinear_interpolate, uv_tex, g_uv_coords, process_uv
 
 
 __yuv420p__ = av.video.format.VideoFormat('yuv420p')
 __bgr24__ = av.video.format.VideoFormat('bgr24')
+__uv_text_size__ = 256
 __config_path__ = "configs/tddfa_onnx_config.yml"
 __config__ = yaml.load(open(__config_path__), Loader=yaml.SafeLoader)
+__uv_cords__ = _to_ctype(process_uv(g_uv_coords.copy(), uv_h=__uv_text_size__, uv_w=__uv_text_size__))
 with open("./core/tri.pkl", "rb") as f:
     __tri__ = pickle.load(f)
 
 
 class TDDFAPredictionContainer:
-    def __init__(self, background: Dict[int, np.ndarray], vertices: Dict[int, np.ndarray], colors: Dict[int, np.ndarray]):
+    def __init__(self, background: Dict[int, np.ndarray], vertices: Dict[int, np.ndarray], uv_textures: Dict[int, np.ndarray]):
         self.background = background
         self.vertices = vertices
-        self.colors = colors
+        self.uv_textures = uv_textures
 
-    def encode(self, context):
+    def encode(self, bg_context, uv_context):
         for key in self.background.keys():
-            frame = self.background[key]
-            frame = av.VideoFrame.from_ndarray(frame, format="bgr24")
-            frame = frame.reformat(width=480, height=640, format=__yuv420p__)
-            self.background[key] = self.packet_to_bytes(context.encode(frame)[0])
+            frame = av.VideoFrame.from_ndarray(self.background[key], format="bgr24")
+            frame = frame.reformat(format=__yuv420p__)
+            self.background[key] = self.packet_to_bytes(bg_context.encode(frame)[0])
+            if key in self.uv_textures.keys():
+                uv_text = av.VideoFrame.from_ndarray(self.uv_textures[key], format="bgr24")
+                uv_text = uv_text.reformat(format=__yuv420p__)
+                self.uv_textures[key] = self.packet_to_bytes(uv_context.encode(uv_text)[0])
         packet = pickle.dumps(self)
         packet = zlib.compress(packet)
         return packet
 
-    def decode(self, context):
+    def decode(self, bg_context, uv_context, result_shape):
         frames = []
         for key in self.background.keys():
-            bg = self.packet_from_bytes(self.background[key])
-            bg = context.decode(bg)[0]
-            bg = bg.reformat(format=__bgr24__).to_ndarray()
-            bg = cv2.blur(cv2.resize(bg, (context.height, context.width), cv2.INTER_NEAREST), (3, 3))
-            if key in self.vertices.keys():
-                frame = rasterize(self.vertices[key],
-                                  __tri__,
-                                  self.colors[key],
-                                  bg=bg,
-                                  height=context.height,
-                                  width=context.width,
-                                  channel=3)
+            bg = self.decode_packet(self.background[key], bg_context)
+            bg = cv2.blur(cv2.resize(bg, result_shape, cv2.INTER_LINEAR), (3, 3))
+            if key in self.uv_textures.keys():
+                uv_text = self.decode_packet(self.uv_textures[key], uv_context)
+                colors = bilinear_interpolate(uv_text, __uv_cords__[:, 0], __uv_cords__[:, 1]) / 255.
+                ver = _to_ctype(self.vertices[key].T)
+                frame = rasterize(ver, __tri__, colors, bg=bg)
             else:
                 frame = bg
             frame = QImage(frame, frame.shape[1], frame.shape[0], frame.shape[1] * 3, QImage.Format_RGB888)
             frame = QPixmap.fromImage(frame)
             frames.append(frame)
         return frames
+
+    def decode_packet(self, frame, context):
+        frame = self.packet_from_bytes(frame)
+        frame = context.decode(frame)[0]
+        return frame.reformat(format=__bgr24__).to_ndarray()
 
     def packet_to_bytes(self, packet):
         encoded_packet = packet.dts.to_bytes(4, byteorder='big')
@@ -89,15 +94,14 @@ class TDDFAWrapper:
         self.back_shape = background_shape
         self.background = {}
         self.vertices = {}
-        self.colors = {}
+        self.uv_textures = {}
         self.frame_num = 0
-        self.first_frame = True
 
     def pop_packet(self):
-        packet = TDDFAPredictionContainer(self.background, self.vertices, self.colors)
+        packet = TDDFAPredictionContainer(self.background, self.vertices, self.uv_textures)
         self.background = {}
         self.vertices = {}
-        self.colors = {}
+        self.uv_textures = {}
         self.frame_num = 0
         return packet
 
@@ -107,9 +111,7 @@ class TDDFAWrapper:
         if len(boxes) != 0:
             param_lst, roi_box_lst = self.tddfa(frame, [boxes[0]], crop_policy="box")
             vertices = self.tddfa.recon_vers(param_lst, roi_box_lst, DENSE_FLAG=True)[0]
-            vertices = _to_ctype(vertices.T)
-            colors = bilinear_interpolate(frame, vertices[:, 0], vertices[:, 1]) / 255.
+            uv_texture = uv_tex(frame, [vertices], self.tddfa.tri, uv_h=__uv_text_size__, uv_w=__uv_text_size__)
             self.vertices[self.frame_num] = vertices
-            self.colors[self.frame_num] = colors
+            self.uv_textures[self.frame_num] = uv_texture
         self.background[self.frame_num] = background
-        self.first_frame = False

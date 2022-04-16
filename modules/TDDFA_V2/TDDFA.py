@@ -1,6 +1,4 @@
 # coding: utf-8
-import sys
-sys.path.append("./modules/TDDFA_V2")
 __author__ = 'cleardusk'
 
 import os.path as osp
