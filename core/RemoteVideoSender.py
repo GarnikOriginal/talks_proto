@@ -1,21 +1,14 @@
 import av
 import json
-import socket
 import PyQt5.QtCore as QtCore
-from common.Telemetry import Telemetry
+from core.VideoWorker import RemoteVideoWorker
 from core.TDDFA import TDDFAPredictionContainer, __yuv420p__, __uv_text_w__, __uv_text_h__
 from core.сore import server_port
 
 
-class RemoteVideoSender(QtCore.QObject):
-    updateTrafficSignal = QtCore.pyqtSignal(int, int)
-    updateOutputFPSSignal = QtCore.pyqtSignal(int)
-
+class RemoteVideoSender(RemoteVideoWorker):
     def __init__(self, address, local_config):
-        super(RemoteVideoSender, self).__init__()
-        self.address = address
-        self.local_config = local_config
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        super(RemoteVideoSender, self).__init__(address, local_config)
         self.config_sent = False
         h, w = self.local_config["video_size"].split("x")
         self.bg_encoder, self.bg_encoder_contex = self.create_encoder(int(h) // self.local_config["bg_scale"],
@@ -24,10 +17,9 @@ class RemoteVideoSender(QtCore.QObject):
         self.uv_encoder, self.uv_encoder_contex = self.create_encoder(__uv_text_h__,
                                                                       __uv_text_w__,
                                                                       self.local_config["framerate"])
-        self.telemetry = Telemetry()
 
     def run(self):
-        while self.socket.connect_ex((self.address, server_port)):
+        while self.socket.connect_ex((self.address, server_port)) and self.running:
             pass
 
     @QtCore.pyqtSlot(TDDFAPredictionContainer)
@@ -43,8 +35,8 @@ class RemoteVideoSender(QtCore.QObject):
             self.telemetry.step_traffic(size / 1024)
             self.telemetry.step_frame()
             if self.telemetry.stats_ready():
-                traffic, total_traffic, fps = self.telemetry.get_stats()
-                self.updateTrafficSignal.emit(traffic, total_traffic)
+                traffic, per_frame, total_traffic, fps = self.telemetry.get_stats()
+                self.updateTrafficSignal.emit(traffic, per_frame, total_traffic)
                 self.updateOutputFPSSignal.emit(fps)
         except Exception as err:
             raise err
@@ -66,7 +58,3 @@ class RemoteVideoSender(QtCore.QObject):
         context.height = h
         context.width = w
         return encoder, context
-
-    @QtCore.pyqtSlot()
-    def close_connection(self):
-        self.socket.close()

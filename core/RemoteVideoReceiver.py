@@ -2,26 +2,14 @@ import av
 import json
 import zlib
 import pickle
-import socket
-import PyQt5.QtCore as QtCore
-from PyQt5.QtGui import QPixmap
-from common.Telemetry import Telemetry
-from core.VideoWorker import VideoWorker
+from core.VideoWorker import RemoteVideoWorker
 from core.TDDFA import __uv_text_h__, __uv_text_w__, __yuv420p__
 from core.сore import server_port
 
 
-class RemoteVideoReceiver(VideoWorker):
-    updateTrafficSignal = QtCore.pyqtSignal(int, int)
-    updateOutputFPSSignal = QtCore.pyqtSignal(int)
-    frameReadySignal = QtCore.pyqtSignal(QPixmap)
-    connectionClosed = QtCore.pyqtSignal(str)
-
-    def __init__(self, address):
-        super(RemoteVideoReceiver, self).__init__()
-        self.address = address
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.telemetry = Telemetry()
+class RemoteVideoReceiver(RemoteVideoWorker):
+    def __init__(self, address, local_config):
+        super(RemoteVideoReceiver, self).__init__(address, local_config)
         self.config = None
         self.bg_decoder = None
         self.bg_decoder_context = None
@@ -40,7 +28,7 @@ class RemoteVideoReceiver(VideoWorker):
         self.config["w"] = int(w)
         self.config["h"] = int(h)
         self.create_decoders()
-        while connection:
+        while connection and self.running:
             while len(packet) < 4:
                 packet += connection.recv(4096)
             size_bytes, packet = packet[0:4], packet[4:]
@@ -59,11 +47,12 @@ class RemoteVideoReceiver(VideoWorker):
             self.buffer = b""
             self.message_size = -1
             if self.telemetry.stats_ready():
-                traffic, total_traffic, fps = self.telemetry.get_stats()
-                self.updateTrafficSignal.emit(traffic, total_traffic)
+                traffic, per_frame, total_traffic, fps = self.telemetry.get_stats()
+                self.updateTrafficSignal.emit(traffic, per_frame, total_traffic)
                 self.updateOutputFPSSignal.emit(fps)
         self.socket.close()
-        self.connectionClosed.emit(self.address)
+        if self.local_config["write_log"]:
+            self.telemetry.save_logs()
 
     def read_config(self, connection):
         packet = connection.recv(4096)

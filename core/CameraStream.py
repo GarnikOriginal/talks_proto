@@ -15,5 +15,5 @@ class CameraStream:
     def get_current_package(self):
         yield self.steam.__next__()
 
-    def __del__(self):
+    def close(self):
         self.camera.close()

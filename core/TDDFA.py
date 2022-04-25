@@ -54,7 +54,8 @@ class TDDFAPredictionContainer:
         frames = []
         for key in self.background.keys():
             bg = self.decode_packet(self.background[key], bg_context)
-            bg = cv2.blur(cv2.resize(bg, result_shape, cv2.INTER_LINEAR), (3, 3))
+            bg = cv2.resize(bg, result_shape, cv2.INTER_LINEAR)
+            bg = cv2.blur(bg, (3, 3))
             if key in self.uv_textures.keys():
                 uv_text = self.decode_packet(self.uv_textures[key], uv_context)
                 colors = bilinear_interpolate(uv_text, __uv_cords__[:, 0], __uv_cords__[:, 1]) / 255.
