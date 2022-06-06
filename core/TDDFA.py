@@ -100,6 +100,7 @@ class TDDFAWrapper:
         super(TDDFAWrapper, self).__init__()
         self.tddfa = TDDFA(gpu_mode=False, **__config__)
         self.faceboxes = FaceBoxes()
+        self.boxes = None
         self.back_shape = background_shape
         self.background = {}
         self.deep_features = {}
@@ -117,10 +118,11 @@ class TDDFAWrapper:
         return packet
 
     def forward(self, frame):
-        boxes = self.faceboxes(frame)
+        if self.boxes is None:
+            self.boxes = self.faceboxes(frame)
         background = cv2.resize(frame, self.back_shape, interpolation=cv2.INTER_LINEAR)
-        if len(boxes) != 0:
-            param_lst, roi_box_lst = self.tddfa(frame, [boxes[0]], crop_policy="box")
+        if len(self.boxes) != 0:
+            param_lst, roi_box_lst = self.tddfa(frame, [self.boxes[0]], crop_policy="box")
             vertices = self.tddfa.recon_vers(param_lst, roi_box_lst, DENSE_FLAG=True)[0]
             uv_texture = uv_tex(frame, [vertices], self.tddfa.tri, uv_h=__uv_text_h__, uv_w=__uv_text_w__)
             self.deep_features[self.frame_num] = param_lst[0]

@@ -1,7 +1,7 @@
 import socket
 import PyQt5.QtCore as QtCore
 from PyQt5.QtGui import QPixmap
-from common.Telemetry import Telemetry
+from core.Telemetry import Telemetry
 from core.TDDFA import TDDFAPredictionContainer
 
 
